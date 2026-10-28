@@ -159,19 +159,6 @@ var UGSW = (function () {
     );
   }
 
-  function games() {
-    return manifest ? manifest.games : [];
-  }
-
-  function gameInfo(raw) {
-    return {
-      id: raw,
-      name: displayName(raw),
-      file: raw + '.html',
-      path: gameURL(raw)
-    };
-  }
-
   function groupOf(raw) {
     var value = String(raw);
     var rest = /^cl/.test(value) ? value.slice(2) : value;
@@ -399,8 +386,6 @@ var UGSW = (function () {
     exists: exists,
     loadGames: loadGames,
     gamesReady: gamesReady,
-    games: games,
-    gameInfo: gameInfo,
     groupOf: groupOf,
     code: code,
     gameURL: gameURL,
