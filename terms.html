@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" id="themeColor" content="#f4f0e5">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Terms — Ultimate Game Stash</title>
+<meta name="description" content="The terms that apply to using the UGSW catalogue, YouTube search, and proxy tools.">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('ugsw:theme');
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', t === 'dark' ? '#14130f' : '#f4f0e5');
+  } catch (e) {}
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="common.js" defer></script>
+</head>
+<body class="page" id="top">
+<a class="skip" href="#main">Skip to the policy</a>
+<div class="shell">
+  <div class="main main--plain">
+    <div class="inner">
+
+      <header class="topbar">
+        <a class="brand" href="index.html" aria-label="Ultimate Game Stash home">
+          <svg class="mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="3" y="3.5" width="18" height="4" fill="currentColor"/>
+            <rect x="6" y="10" width="15" height="4" fill="currentColor"/>
+            <rect class="mark__accent" x="9" y="16.5" width="12" height="4"/>
+          </svg>
+          <span class="brand__full">Ultimate Game Stash</span>
+          <span class="brand__short">UGSW</span>
+        </a>
+        <nav class="topbar__nav" aria-label="Primary">
+          <a href="index.html">Stash</a>
+          <a href="yt.html">YouTube</a>
+          <a href="spotify.html">Spotify</a>
+          <a href="ai.html">AI</a>
+          <a href="proxy.html">Proxy</a>
+          <button class="btn btn--icon btn--quiet" type="button" data-theme-toggle aria-label="Switch to dark theme" aria-pressed="false">
+            <svg class="icon" data-icon-moon viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M13.6 9.6A6 6 0 0 1 6.4 2.4a6 6 0 1 0 7.2 7.2Z"/>
+            </svg>
+            <svg class="icon" data-icon-sun viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <circle cx="8" cy="8" r="3"/>
+              <path d="M8 1v2.1M8 12.9V15M1 8h2.1M12.9 8H15M2.9 2.9l1.5 1.5M11.6 11.6l1.5 1.5M13.1 2.9l-1.5 1.5M4.4 11.6l-1.5 1.5"/>
+            </svg>
+          </button>
+        </nav>
+      </header>
+
+      <main class="prose" id="main" tabindex="-1">
+        <p class="kicker">Site policy</p>
+        <h1>Terms of <em>use</em></h1>
+        <p class="updated">Last updated 28 October 2026</p>
+
+        <p>
+          UGSW is an unofficial index of browser game files mirrored from the public
+          Ultimate Game Stash document. It is not affiliated with, endorsed by, or sponsored
+          by the authors or publishers of those games.
+        </p>
+
+        <h2>Game files</h2>
+        <p>
+          Game files remain the property of their respective owners. This site claims no
+          rights in them and does not grant you any rights to them. Files are served as-is
+          and may be removed or become unavailable without notice. The site's original
+          design and code are © 2026 UGSW.
+        </p>
+
+        <h2>No warranty</h2>
+        <p>
+          The catalogue and the optional tools are provided as-is, without warranty of any
+          kind. No guarantee is made that a game will run, that a page will render correctly
+          through the proxy, or that a search will return complete or current results.
+        </p>
+
+        <h2>Using the tools</h2>
+        <ul>
+          <li>The YouTube tool reads public search results and plays video through YouTube's no-cookie embed. YouTube's terms still apply to that use.</li>
+          <li>The Spotify tool resolves links and searches through the backend, then plays through Spotify's embed. Spotify's terms still apply to that use.</li>
+          <li>The AI tool sends messages through the backend to a fixed model, DeepSeek V4.1 Flash. Output can be inaccurate; check it before relying on it.</li>
+          <li>The proxy is a GET-only reader for simple pages. It is not a tool for bypassing paywalls, authentication, or a site's access controls.</li>
+          <li>You are responsible for complying with the terms of the sites you access and with the law where you are.</li>
+        </ul>
+
+        <h2>Rights requests</h2>
+        <p>
+          If you own rights in a file served here and want it removed, contact the project in
+          the <a href="https://discord.gg/rmVsAqkpkA" target="_blank" rel="noopener">UGSW Discord</a>
+          with the file address.
+        </p>
+
+        <h2>Changes</h2>
+        <p>
+          These terms and the site itself may change. The date at the top of this page marks
+          the latest revision.
+        </p>
+      </main>
+
+      <footer class="footer">
+        <div>
+          <a class="brand" href="index.html">
+            <svg class="mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <rect x="3" y="3.5" width="18" height="4" fill="currentColor"/>
+              <rect x="6" y="10" width="15" height="4" fill="currentColor"/>
+              <rect class="mark__accent" x="9" y="16.5" width="12" height="4"/>
+            </svg>
+            <span class="brand__full">Ultimate Game Stash</span>
+            <span class="brand__short">UGSW</span>
+          </a>
+          <p class="footer__note">An index of community-mirrored browser games.</p>
+        </div>
+        <nav class="footer__links" aria-label="Footer">
+          <a href="index.html">Stash</a>
+          <a href="yt.html">YouTube</a>
+          <a href="spotify.html">Spotify</a>
+          <a href="ai.html">AI</a>
+          <a href="proxy.html">Proxy</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html" aria-current="page">Terms</a>
+          <a href="#top">Top</a>
+        </nav>
+        <p class="footer__legal">© 2026 UGSW · Game files remain with their respective authors.</p>
+      </footer>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

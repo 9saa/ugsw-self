@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" id="themeColor" content="#f4f0e5">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Game — Ultimate Game Stash</title>
+<meta name="description" content="Play a browser game from the Ultimate Game Stash." id="metaDescription">
+<meta name="robots" content="noindex, follow">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('ugsw:theme');
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', t === 'dark' ? '#14130f' : '#f4f0e5');
+  } catch (e) {}
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="common.js" defer></script>
+<script src="play.js" defer></script>
+</head>
+<body class="play" id="top">
+<a class="skip" href="#stage">Skip to the game</a>
+
+<header class="playbar">
+  <a class="brand" href="index.html" id="backLink" aria-label="Back to the stash">
+    <svg class="mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="3" y="3.5" width="18" height="4" fill="currentColor"/>
+      <rect x="6" y="10" width="15" height="4" fill="currentColor"/>
+      <rect class="mark__accent" x="9" y="16.5" width="12" height="4"/>
+    </svg>
+    <span class="brand__full">Ultimate Game Stash</span>
+    <span class="brand__short">UGSW</span>
+  </a>
+  <span class="playbar__crumb" aria-hidden="true">/</span>
+  <div class="playbar__id">
+    <h1 class="playbar__name" id="gameName">Opening file…</h1>
+    <span class="playbar__code" id="gameCode"></span>
+  </div>
+  <div class="playbar__actions">
+    <button class="btn btn--quiet btn--small btn--pin" id="pin" type="button" aria-pressed="false" aria-label="Pin this game">
+      <span class="btn__text">Pin</span>
+      <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M8 2.4 9.8 6l3.9.6-2.8 2.8.7 3.9L8 11.4 4.4 13.3l.7-3.9L2.3 6.6 6.2 6Z"/>
+      </svg>
+    </button>
+    <button class="btn btn--quiet btn--small" id="shuffle" type="button" aria-label="Play a random game">
+      <span class="btn__text">Shuffle</span>
+      <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M2 4h4.5L14 12M2 12h4.5L14 4"/>
+        <path d="M11.5 2.5 14 4l-2.5 1.5M11.5 10.5 14 12l-2.5 1.5"/>
+      </svg>
+    </button>
+    <button class="btn btn--quiet btn--small btn--optional" id="copy" type="button" aria-label="Copy a link to this game">
+      <span class="btn__text">Copy link</span>
+      <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M6 10 10 6"/>
+        <path d="M7 4.5 8.5 3a3 3 0 0 1 4.5 4.5L11.5 9"/>
+        <path d="M9 11.5 7.5 13A3 3 0 0 1 3 8.5L4.5 7"/>
+      </svg>
+    </button>
+    <a class="btn btn--quiet btn--small btn--optional" id="standalone" href="index.html" target="_blank" rel="noopener" aria-label="Open the raw game file in a new tab">
+      <span class="btn__text">Standalone</span>
+      <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M6 3h7v7M13 3 6 10"/>
+        <path d="M11 9v4H3V5h4"/>
+      </svg>
+    </a>
+    <button class="btn btn--quiet btn--small" id="reload" type="button">
+      <span class="btn__text">Reload</span>
+      <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/>
+        <path d="M13.5 2.5V6H10"/>
+      </svg>
+    </button>
+    <button class="btn btn--icon btn--quiet" type="button" data-theme-toggle aria-label="Switch to dark theme" aria-pressed="false">
+      <svg class="icon" data-icon-moon viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M13.6 9.6A6 6 0 0 1 6.4 2.4a6 6 0 1 0 7.2 7.2Z"/>
+      </svg>
+      <svg class="icon" data-icon-sun viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <circle cx="8" cy="8" r="3"/>
+        <path d="M8 1v2.1M8 12.9V15M1 8h2.1M12.9 8H15M2.9 2.9l1.5 1.5M11.6 11.6l1.5 1.5M13.1 2.9l-1.5 1.5M4.4 11.6l-1.5 1.5"/>
+      </svg>
+    </button>
+    <button class="btn btn--icon btn--quiet" id="fullscreen" type="button" aria-label="Enter full screen" hidden>
+      <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M6 2H2v4M10 2h4v4M14 10v4h-4M6 14H2v-4"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main class="stage" id="stage" aria-label="Game screen" tabindex="-1">
+  <iframe class="stage__frame" id="frame" title="Game" tabindex="0"
+          allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
+
+  <div class="stage__notice" id="loading" role="status">
+    <span class="kicker">Opening file</span>
+    <strong id="loadingName">Loading…</strong>
+    <p id="loadingHint">The game may pull assets from a CDN. Give it a moment.</p>
+    <p class="stage__keys">R reload · S shuffle · F fullscreen · P pin</p>
+    <div class="progress" aria-hidden="true"><span></span></div>
+    <a class="btn" id="loadingStandalone" href="index.html" target="_blank" rel="noopener" hidden>Open standalone</a>
+  </div>
+
+  <div class="stage__notice is-hidden" id="error" role="alert" hidden>
+    <span class="kicker" id="errorKicker">Not in the stash</span>
+    <strong id="errorTitle">That file isn't in the stash</strong>
+    <p id="errorText">The link may point to a game that has been removed. Try the catalogue or pick a random file.</p>
+    <div class="btn-row">
+      <a class="btn btn--primary" id="errorBack" href="index.html">Back to the stash</a>
+      <button class="btn" type="button" data-random>Pick a random game</button>
+    </div>
+  </div>
+
+  <noscript>
+    <div class="stage__notice">
+      <span class="kicker">JavaScript is off</span>
+      <strong>This player needs JavaScript.</strong>
+      <p>Open the catalogue to browse the mirrored files.</p>
+      <a class="btn btn--primary" href="index.html">Back to the stash</a>
+    </div>
+  </noscript>
+</main>
+</body>
+</html>

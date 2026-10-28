@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UGSW — moved</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('ugsw:theme');
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+  location.replace('index.html' + location.search + location.hash);
+})();
+</script>
+</head>
+<body>
+<p>This catalogue now lives at <a href="index.html">index.html</a>.</p>
+</body>
+</html>

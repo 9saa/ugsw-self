@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" id="themeColor" content="#f4f0e5">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Privacy — Ultimate Game Stash</title>
+<meta name="description" content="What UGSW stores in your browser, what the catalogue sends over the network, and how to clear it.">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('ugsw:theme');
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', t === 'dark' ? '#14130f' : '#f4f0e5');
+  } catch (e) {}
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="common.js" defer></script>
+</head>
+<body class="page" id="top">
+<a class="skip" href="#main">Skip to the policy</a>
+<div class="shell">
+  <div class="main main--plain">
+    <div class="inner">
+
+      <header class="topbar">
+        <a class="brand" href="index.html" aria-label="Ultimate Game Stash home">
+          <svg class="mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="3" y="3.5" width="18" height="4" fill="currentColor"/>
+            <rect x="6" y="10" width="15" height="4" fill="currentColor"/>
+            <rect class="mark__accent" x="9" y="16.5" width="12" height="4"/>
+          </svg>
+          <span class="brand__full">Ultimate Game Stash</span>
+          <span class="brand__short">UGSW</span>
+        </a>
+        <nav class="topbar__nav" aria-label="Primary">
+          <a href="index.html">Stash</a>
+          <a href="yt.html">YouTube</a>
+          <a href="spotify.html">Spotify</a>
+          <a href="ai.html">AI</a>
+          <a href="proxy.html">Proxy</a>
+          <button class="btn btn--icon btn--quiet" type="button" data-theme-toggle aria-label="Switch to dark theme" aria-pressed="false">
+            <svg class="icon" data-icon-moon viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M13.6 9.6A6 6 0 0 1 6.4 2.4a6 6 0 1 0 7.2 7.2Z"/>
+            </svg>
+            <svg class="icon" data-icon-sun viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <circle cx="8" cy="8" r="3"/>
+              <path d="M8 1v2.1M8 12.9V15M1 8h2.1M12.9 8H15M2.9 2.9l1.5 1.5M11.6 11.6l1.5 1.5M13.1 2.9l-1.5 1.5M4.4 11.6l-1.5 1.5"/>
+            </svg>
+          </button>
+        </nav>
+      </header>
+
+      <main class="prose" id="main" tabindex="-1">
+        <p class="kicker">Site policy</p>
+        <h1>Privacy <em>note</em></h1>
+        <p class="updated">Last updated 28 October 2026</p>
+
+        <p>
+          UGSW is a static catalogue with no accounts, no advertising, and no analytics.
+          The catalogue itself does not set cookies. It stores a small amount of interface
+          state in your browser's <code>localStorage</code> so that searches and the last
+          game survive a refresh. Individual game files are third-party and may use their
+          own storage or cookies; those choices are theirs, not the catalogue's.
+        </p>
+
+        <h2>What is stored on your device</h2>
+        <ul>
+          <li>The theme you picked (<code>ugsw:theme</code>).</li>
+          <li>The catalogue search and scroll position (<code>ugsw:view</code>).</li>
+          <li>Up to eight recently played game files (<code>ugsw:recent</code>) and the last one opened (<code>ugsw:last</code>).</li>
+          <li>The last YouTube search and result tab, the last proxy address, and recent Spotify items, if you used those tools (<code>ugsw:yt</code>, <code>ugsw:proxy</code>, <code>ugsw:spotify</code>).</li>
+        </ul>
+        <p>
+          This information stays on your device. You can remove it with the “Clear history”
+          button in the catalogue's recently played section, or by clearing site data for
+          this origin in your browser.
+        </p>
+
+        <h2>Network requests</h2>
+        <p>
+          The catalogue, stylesheets, and game files are loaded from this site. Typefaces are
+          requested from Google Fonts, which receives that request. Individual game files may
+          load their own assets from third-party services such as CDNs; those requests are
+          made by the game, and those services receive the usual request information (IP
+          address, user agent, requested URL) under their own policies.
+        </p>
+        <p>
+          The YouTube tool sends your query to the UGSW backend, which fetches YouTube's
+          public results page. The proxy tool sends the address you enter to the same
+          backend, which fetches that page and returns it. The Spotify tool sends searches
+          and links to the backend, which may query Spotify's API or a public web index to
+          resolve them. The AI tool sends the conversation you type to the same backend,
+          which forwards it to the model provider to generate a reply; the site does not
+          store the conversation. The backend is served from <code>api.ugsw.fun</code> through
+          Cloudflare. Video playback uses
+          <code>youtube-nocookie.com</code>; Spotify playback uses
+          <code>open.spotify.com</code>'s embed. YouTube, Google and Spotify handle those
+          embeds under their own policies.
+        </p>
+        <p>
+          The backend may be password-gated for the proxy. It does not create accounts and
+          does not set cookies for this site. Requests to the backend are processed by
+          Cloudflare and the service behind it under their terms.
+        </p>
+
+        <h2>Questions</h2>
+        <p>
+          The project's public chat is the
+          <a href="https://discord.gg/rmVsAqkpkA" target="_blank" rel="noopener">UGSW Discord</a>.
+          The source document for the catalogue is the
+          <a href="https://docs.google.com/document/d/1_FmH3BlSBQI7FGgAQL59-ZPe8eCxs35wel6JUyVaG8Q/" target="_blank" rel="noopener">Ultimate Game Stash document</a>.
+        </p>
+      </main>
+
+      <footer class="footer">
+        <div>
+          <a class="brand" href="index.html">
+            <svg class="mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <rect x="3" y="3.5" width="18" height="4" fill="currentColor"/>
+              <rect x="6" y="10" width="15" height="4" fill="currentColor"/>
+              <rect class="mark__accent" x="9" y="16.5" width="12" height="4"/>
+            </svg>
+            <span class="brand__full">Ultimate Game Stash</span>
+            <span class="brand__short">UGSW</span>
+          </a>
+          <p class="footer__note">An index of community-mirrored browser games.</p>
+        </div>
+        <nav class="footer__links" aria-label="Footer">
+          <a href="index.html">Stash</a>
+          <a href="yt.html">YouTube</a>
+          <a href="spotify.html">Spotify</a>
+          <a href="ai.html">AI</a>
+          <a href="proxy.html">Proxy</a>
+          <a href="privacy.html" aria-current="page">Privacy</a>
+          <a href="terms.html">Terms</a>
+          <a href="#top">Top</a>
+        </nav>
+        <p class="footer__legal">© 2026 UGSW · Game files remain with their respective authors.</p>
+      </footer>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" id="themeColor" content="#f4f0e5">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Spotify player - Ultimate Game Stash</title>
+<meta name="description" content="Search Spotify and play tracks, albums and playlists through Spotify's account-free embed. No login and no API key required for playback.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ultimate Game Stash">
+<meta property="og:title" content="Spotify player - UGSW">
+<meta property="og:description" content="Search Spotify and play in place through the account-free embed.">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('ugsw:theme');
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', t === 'dark' ? '#14130f' : '#f4f0e5');
+  } catch (e) {}
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="common.js" defer></script>
+<script src="spotify.js" defer></script>
+</head>
+<body id="top">
+<a class="skip" href="#spotifyResults">Skip to results</a>
+
+<div class="shell">
+  <div class="main main--plain">
+    <div class="inner">
+
+      <header class="topbar">
+        <a class="brand" href="index.html" aria-label="Ultimate Game Stash home">
+          <svg class="mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="3" y="3.5" width="18" height="4" fill="currentColor"/>
+            <rect x="6" y="10" width="15" height="4" fill="currentColor"/>
+            <rect class="mark__accent" x="9" y="16.5" width="12" height="4"/>
+          </svg>
+          <span class="brand__full">Ultimate Game Stash</span>
+          <span class="brand__short">UGSW</span>
+        </a>
+        <nav class="topbar__nav" aria-label="Primary">
+          <a href="index.html">Stash</a>
+          <a href="yt.html">YouTube</a>
+          <a href="spotify.html" aria-current="page">Spotify</a>
+          <a href="ai.html">AI</a>
+          <a href="proxy.html">Proxy</a>
+          <button class="btn btn--icon btn--quiet" type="button" data-theme-toggle aria-label="Switch to dark theme" aria-pressed="false">
+            <svg class="icon" data-icon-moon viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M13.6 9.6A6 6 0 0 1 6.4 2.4a6 6 0 1 0 7.2 7.2Z"/>
+            </svg>
+            <svg class="icon" data-icon-sun viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <circle cx="8" cy="8" r="3"/>
+              <path d="M8 1v2.1M8 12.9V15M1 8h2.1M12.9 8H15M2.9 2.9l1.5 1.5M11.6 11.6l1.5 1.5M13.1 2.9l-1.5 1.5M4.4 11.6l-1.5 1.5"/>
+            </svg>
+          </button>
+        </nav>
+      </header>
+
+      <main id="main">
+        <header class="masthead masthead--tool">
+        <div class="masthead__lead">
+          <p class="kicker">UGSW - Tool 03</p>
+          <h1>Spotify <em>player</em></h1>
+          <p class="lede">
+            Search Spotify and play tracks, albums and playlists in place through Spotify's
+            own embed. Playback does not need an account. Paste an
+            <code>open.spotify.com</code> link if search is unavailable.
+          </p>
+        </div>
+        <aside class="ledger" aria-label="Spotify status">
+          <dl class="ledger__list">
+            <div class="ledger__row">
+              <dt>Backend</dt>
+              <dd><span class="status" data-backend-status data-state="checking" aria-live="polite">Checking</span></dd>
+            </div>
+            <div class="ledger__row">
+              <dt>Search</dt>
+              <dd><span class="status" id="spotifySearchState" data-state="checking" aria-live="polite">Checking</span></dd>
+            </div>
+            <div class="ledger__row">
+              <dt>Playback</dt>
+              <dd>Account-free embed</dd>
+            </div>
+          </dl>
+          <p class="ledger__empty">
+            Playback loads <code>open.spotify.com</code> in an embed. If your network blocks
+            Spotify, the embed cannot load; the proxy does not carry Spotify audio.
+          </p>
+        </aside>
+      </header>
+
+      <form class="toolform" id="spotifyForm" role="search">
+        <div class="searchbar">
+          <label class="sr-only" for="spotifyInput">Search Spotify or paste a link</label>
+          <span class="searchbar__icon" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <circle cx="8" cy="8" r="6"/>
+              <path d="M5 6.2c1.9-.5 4.1-.2 5.7.8M5.4 8.4c1.5-.4 3.2-.1 4.5.7M5.8 10.6c1.1-.3 2.4 0 3.4.6"/>
+            </svg>
+          </span>
+          <input id="spotifyInput" name="q" type="search" placeholder="Search songs, albums, playlists or paste a link"
+                 autocomplete="off" spellcheck="false" enterkeyhint="search" aria-keyshortcuts="/">
+          <button class="btn btn--primary searchbar__submit" type="submit">Search</button>
+        </div>
+        <div class="segmented" id="spotifyTabs" role="group" aria-label="Result type">
+          <button type="button" aria-pressed="true" data-type="all">All</button>
+          <button type="button" aria-pressed="false" data-type="track">Tracks</button>
+          <button type="button" aria-pressed="false" data-type="album">Albums</button>
+          <button type="button" aria-pressed="false" data-type="playlist">Playlists</button>
+          <button type="button" aria-pressed="false" data-type="artist">Artists</button>
+        </div>
+      </form>
+
+      <p class="finenote" id="spotifyNote">
+        Paste any <code>open.spotify.com</code> link to play it directly. Search uses the
+        backend's Spotify API when configured, then a public web index.
+      </p>
+
+      <section class="featured" id="spotifyFeatured" aria-labelledby="spotifyFeaturedHeading">
+        <div class="section-line">
+          <h2 id="spotifyFeaturedHeading">Featured playlists</h2>
+          <span class="toolmeta__count">Spotify editorial</span>
+        </div>
+        <div class="results results--music" id="spotifyFeaturedList"></div>
+      </section>
+
+      <div class="section-line section-line--spaced">
+        <h2 id="spotifyHeading">Results</h2>
+        <span class="toolmeta__count" id="spotifyCount" aria-live="polite"></span>
+      </div>
+
+      <div class="state" id="spotifyState" role="status">Search for music, or paste a Spotify link.</div>
+      <div class="results results--music" id="spotifyResults" tabindex="-1"></div>
+
+      <section class="recent" id="spotifyRecent" aria-labelledby="spotifyRecentHeading" hidden>
+        <div class="section-line">
+          <h2 id="spotifyRecentHeading">Recently played</h2>
+          <button class="btn btn--quiet btn--small" id="spotifyClearRecent" type="button">Clear</button>
+        </div>
+        <div class="recent__grid" id="spotifyRecentList"></div>
+      </section>
+
+      <noscript>
+        <p class="state">
+          <span class="kicker">JavaScript is off</span>
+          <strong>Spotify search needs JavaScript.</strong>
+          <span>The query and player are handled in the browser through the UGSW backend.</span>
+        </p>
+      </noscript>
+
+      </main>
+
+      <footer class="footer">
+        <div>
+          <a class="brand" href="index.html">
+            <svg class="mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <rect x="3" y="3.5" width="18" height="4" fill="currentColor"/>
+              <rect x="6" y="10" width="15" height="4" fill="currentColor"/>
+              <rect class="mark__accent" x="9" y="16.5" width="12" height="4"/>
+            </svg>
+            <span class="brand__full">Ultimate Game Stash</span>
+            <span class="brand__short">UGSW</span>
+          </a>
+          <p class="footer__note">
+            Search is resolved by the UGSW backend. Playback uses Spotify's embed; tracks
+            and artwork remain the property of their owners.
+          </p>
+        </div>
+        <nav class="footer__links" aria-label="Footer">
+          <a href="index.html">Stash</a>
+          <a href="yt.html">YouTube</a>
+          <a href="spotify.html" aria-current="page">Spotify</a>
+          <a href="ai.html">AI</a>
+          <a href="proxy.html">Proxy</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+          <a href="#top">Top</a>
+        </nav>
+        <p class="footer__legal">© 2026 UGSW - Not affiliated with Spotify.</p>
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+<dialog class="player" id="spotifyPlayer" aria-labelledby="spotifyPlayerTitle">
+  <div class="player__bar">
+    <span class="player__title" id="spotifyPlayerTitle"></span>
+    <div class="btn-row">
+      <a class="btn btn--quiet" id="spotifyOpen" href="https://open.spotify.com/" target="_blank" rel="noopener">Open ↗</a>
+      <form method="dialog"><button class="btn btn--quiet">Close <kbd>Esc</kbd></button></form>
+    </div>
+  </div>
+  <div class="spotify-frame" id="spotifyFrame">
+    <iframe id="spotifyIframe" title="Spotify player"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>
+</dialog>
+</body>
+</html>
