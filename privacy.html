@@ -99,9 +99,10 @@
           public results page. The proxy tool sends the address you enter to the same
           backend, which fetches that page and returns it. The Spotify tool sends searches
           and links to the backend, which may query Spotify's API or a public web index to
-          resolve them. The AI tool sends the conversation you type to the same backend,
-          which forwards it to the model provider to generate a reply; the site does not
-          store the conversation. The backend is served from <code>api.ugsw.fun</code> through
+          resolve them. The AI tool sends the conversation you type — and any images you
+          attach — to the same backend, which forwards them to the model provider to generate
+          a reply; the site does not store the conversation or the images. The backend is
+          served from <code>api.ugsw.fun</code> through
           Cloudflare. Video playback uses
           <code>youtube-nocookie.com</code>; Spotify playback uses
           <code>open.spotify.com</code>'s embed. YouTube, Google and Spotify handle those

@@ -113,17 +113,27 @@
           <div class="chat__empty" id="chatEmpty">
             <span class="kicker">Ready</span>
             <strong>Ask the AI assistant.</strong>
-            <p>It can help with homework, projects, or anything else. Pick a starter below or type your own.</p>
+            <p>It can help with homework, projects, or anything else — attach a photo and it can read it too. Pick a starter below or type your own.</p>
             <div class="chat__suggestions" id="chatSuggestions"></div>
           </div>
         </div>
 
+        <div class="chat__thumbs" id="chatThumbs" hidden></div>
         <form class="chat__composer" id="chatForm">
           <label class="sr-only" for="chatInput">Message the assistant</label>
+          <input class="sr-only" type="file" id="chatFile" accept="image/*" multiple tabindex="-1">
+          <button class="btn btn--quiet chat__attach" id="chatAttach" type="button" aria-label="Attach a photo" title="Attach a photo">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="M14 10.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h2.5"/>
+              <path d="M13 2v6M10 5h6"/>
+              <circle cx="6" cy="6" r="1.4"/>
+              <path d="M2.5 11.5 5.8 8.2l2 2 5.7-5.7"/>
+            </svg>
+          </button>
           <textarea id="chatInput" rows="1" placeholder="Ask anything…" autocomplete="off" spellcheck="true" aria-keyshortcuts="Enter"></textarea>
           <button class="btn btn--primary chat__send" id="chatSend" type="submit">Send</button>
         </form>
-        <p class="chat__hint">Enter to send · Shift+Enter for a new line · model locked to DeepSeek V4.1 Flash</p>
+        <p class="chat__hint" id="chatHint">Enter to send · Shift+Enter for a new line · up to 4 images · model locked to DeepSeek V4.1 Flash</p>
       </section>
 
       <noscript>

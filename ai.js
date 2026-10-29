@@ -19,16 +19,35 @@
   var suggestions = $('chatSuggestions');
   var clear = $('clearChat');
   var statusLabel = $('aiStatus');
+  var fileInput = $('chatFile');
+  var attachBtn = $('chatAttach');
+  var thumbs = $('chatThumbs');
+  var hint = $('chatHint');
 
   var history = [];
   var busy = false;
   var available = null;
+  var attachments = [];
+
+  var MAX_IMAGES = 4;
+  var MAX_EDGE = 1400;
+  var MAX_IMAGE_CHARS = 4500000;
+  var DEFAULT_HINT = hint ? hint.textContent : '';
+  var hintTimer = null;
+
+  function note(message) {
+    if (!hint) return;
+    hint.textContent = message;
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(function () { hint.textContent = DEFAULT_HINT; }, 4000);
+  }
 
   function setBusy(value) {
     busy = value;
     var disabled = value || available === false;
     input.disabled = disabled;
     send.disabled = disabled;
+    if (attachBtn) attachBtn.disabled = disabled;
     send.textContent = value ? 'Wait' : 'Send';
   }
 
@@ -54,10 +73,114 @@
     if (options && options.pending) classes += ' is-pending';
     var node = el('div', classes);
     node.appendChild(el('span', 'chat__role', role === 'user' ? 'You' : 'Assistant'));
-    var body = node.appendChild(el('div', 'chat__text', text || ''));
+    var body = node.appendChild(el('div', 'chat__text'));
+
+    if (options && options.images && options.images.length) {
+      var strip = el('div', 'chat__msg-images');
+      options.images.forEach(function (src, index) {
+        var image = document.createElement('img');
+        image.src = src;
+        image.alt = 'Attached image ' + (index + 1);
+        strip.appendChild(image);
+      });
+      body.appendChild(strip);
+    }
+    if (text) body.appendChild(document.createTextNode(text));
+
     log.appendChild(node);
     scrollDown();
     return { node: node, text: body };
+  }
+
+  /* ---------- attachments ----------
+     Shrink on the device before sending: the provider bills per image and the
+     Worker caps the request body, so a 12 MP photo would be wasted bytes. */
+  function downscale(file) {
+    return new Promise(function (resolve, reject) {
+      var objectUrl = URL.createObjectURL(file);
+      var image = new Image();
+
+      image.onload = function () {
+        try {
+          var width = image.naturalWidth || image.width || 1;
+          var height = image.naturalHeight || image.height || 1;
+          var scale = Math.min(1, MAX_EDGE / Math.max(width, height));
+          var canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(width * scale));
+          canvas.height = Math.max(1, Math.round(height * scale));
+          canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+
+          var png = /^image\/png$/i.test(file.type);
+          var url = canvas.toDataURL(png ? 'image/png' : 'image/jpeg', 0.85);
+          if (url.length > MAX_IMAGE_CHARS) url = canvas.toDataURL('image/jpeg', 0.8);
+          URL.revokeObjectURL(objectUrl);
+          resolve(url);
+        } catch (error) {
+          URL.revokeObjectURL(objectUrl);
+          reject(error);
+        }
+      };
+
+      image.onerror = function () {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Could not read that image.'));
+      };
+
+      image.src = objectUrl;
+    });
+  }
+
+  function renderThumbs() {
+    if (!thumbs) return;
+    thumbs.textContent = '';
+    thumbs.hidden = !attachments.length;
+    attachments.forEach(function (item, index) {
+      var wrap = el('div', 'chat__thumb');
+      var image = document.createElement('img');
+      image.src = item.url;
+      image.alt = 'Attached image ' + (index + 1);
+      var remove = el('button', '', '×');
+      remove.type = 'button';
+      remove.setAttribute('aria-label', 'Remove attached image ' + (index + 1));
+      remove.addEventListener('click', function () {
+        attachments.splice(index, 1);
+        renderThumbs();
+        focusInput();
+      });
+      wrap.appendChild(image);
+      wrap.appendChild(remove);
+      thumbs.appendChild(wrap);
+    });
+  }
+
+  function addFiles(fileList) {
+    var files = Array.prototype.slice.call(fileList || []).filter(function (file) {
+      return file && /^image\//i.test(file.type || '');
+    });
+    if (!files.length) {
+      note('Only images can be attached.');
+      return;
+    }
+
+    var room = MAX_IMAGES - attachments.length;
+    if (room <= 0) {
+      note('You can attach up to ' + MAX_IMAGES + ' images.');
+      return;
+    }
+    if (files.length > room) {
+      note('Only the first ' + room + (room === 1 ? ' image was' : ' images were') + ' attached.');
+      files = files.slice(0, room);
+    }
+
+    Promise.all(files.map(downscale)).then(function (urls) {
+      urls.forEach(function (url, index) {
+        attachments.push({ url: url, name: files[index].name || 'image' });
+      });
+      renderThumbs();
+      focusInput();
+    }).catch(function (error) {
+      note(error && error.message ? error.message : 'Could not read that image.');
+    });
   }
 
   function removeNode(node) {
@@ -66,6 +189,8 @@
 
   function clearChat() {
     history = [];
+    attachments = [];
+    renderThumbs();
     log.querySelectorAll('.chat__msg').forEach(function (node) { node.remove(); });
     empty.hidden = false;
     input.value = '';
@@ -87,9 +212,29 @@
     var messages = history.slice(-MAX_HISTORY).map(function (entry) {
       return { role: entry.role, content: entry.content };
     });
+
+    // Only the newest turn keeps its images: older ones would be re-uploaded on
+    // every request, and the Worker caps the body size.
+    var lastUser = -1;
+    messages.forEach(function (message, index) {
+      if (message.role === 'user') lastUser = index;
+    });
+    messages = messages.map(function (message, index) {
+      if (!Array.isArray(message.content) || index === lastUser) return message;
+      var text = message.content
+        .filter(function (part) { return part.type === 'text'; })
+        .map(function (part) { return part.text; })
+        .join(' ').trim();
+      return { role: message.role, content: text || '[image attached earlier]' };
+    });
+
     var last = messages[messages.length - 1];
     if (context && last && last.role === 'user') {
-      last.content = last.content + '\n\n' + context;
+      if (Array.isArray(last.content)) {
+        last.content = last.content.concat([{ type: 'text', text: context }]);
+      } else {
+        last.content = last.content + '\n\n' + context;
+      }
     }
     return messages;
   }
@@ -240,18 +385,40 @@
   function sendMessage(raw) {
     if (busy || available === false) return;
     var text = String(raw || input.value || '').trim();
-    if (!text) return;
+    var images = attachments.slice();
+    if (!text && !images.length) return;
+
     input.value = '';
+    attachments = [];
+    renderThumbs();
     grow();
-    addMessage('user', text);
-    history.push({ role: 'user', content: text });
-    request(text);
+
+    var parts = [];
+    if (text) parts.push({ type: 'text', text: text });
+    images.forEach(function (item) {
+      parts.push({ type: 'image_url', image_url: { url: item.url } });
+    });
+    var content = parts.length === 1 && parts[0].type === 'text' ? text : parts;
+
+    addMessage('user', text || 'Photo', {
+      images: images.map(function (item) { return item.url; })
+    });
+    history.push({ role: 'user', content: content });
+    request(text || 'What is in this image?');
   }
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();
     sendMessage();
   });
+
+  if (attachBtn && fileInput) {
+    attachBtn.addEventListener('click', function () { fileInput.click(); });
+    fileInput.addEventListener('change', function () {
+      addFiles(fileInput.files);
+      fileInput.value = '';
+    });
+  }
 
   input.addEventListener('input', grow);
   input.addEventListener('keydown', function (event) {
@@ -284,6 +451,7 @@
     if (!configured) {
       input.placeholder = status ? 'AI is not configured on this backend.' : 'Backend offline.';
       suggestions.querySelectorAll('.chat__suggestion').forEach(function (button) { button.disabled = true; });
+      if (attachBtn) attachBtn.disabled = true;
     }
     setBusy(false);
   });
