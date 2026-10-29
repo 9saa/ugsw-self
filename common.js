@@ -187,10 +187,6 @@ var UGSW = (function () {
     return 'games/' + encodeURIComponent(raw) + '.html';
   }
 
-  function playURL(raw) {
-    return 'play.html?game=' + encodeURIComponent(raw);
-  }
-
   function recent() {
     var list = readJSON(KEYS.recent, null);
     if (!Array.isArray(list)) {
@@ -389,7 +385,6 @@ var UGSW = (function () {
     groupOf: groupOf,
     code: code,
     gameURL: gameURL,
-    playURL: playURL,
     recent: recent,
     remember: remember,
     last: last,

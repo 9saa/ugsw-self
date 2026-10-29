@@ -131,13 +131,16 @@
   
         var li = el('li', 'entry');
         var link = el('a', 'title');
-        link.href = UGSW.playURL(item.raw);
+        link.href = UGSW.gameURL(item.raw);
+        link.target = '_blank';
+        link.rel = 'noopener';
         link.setAttribute('data-initial', item.initial);
+        link.addEventListener('click', function () { UGSW.remember(item.raw); });
   
         var code = el('span', 'title__code', item.code);
         var name = el('span', 'title__name', item.name);
         name.title = item.name;
-        var go = el('span', 'title__go', '→');
+        var go = el('span', 'title__go', '↗');
         go.setAttribute('aria-hidden', 'true');
   
         link.appendChild(code);
@@ -241,14 +244,17 @@
         var item = entryByRaw[raw];
         if (!item) return;
         var link = el('a', 'recent__item');
-        link.href = UGSW.playURL(raw);
+        link.href = UGSW.gameURL(raw);
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.addEventListener('click', function () { UGSW.remember(raw); });
         link.appendChild(el('span', 'recent__code', item.code));
         var name = el('span', 'recent__name', item.name);
         name.title = item.name;
         link.appendChild(name);
         var go = el('span', 'recent__go');
         go.appendChild(document.createTextNode('Resume'));
-        var arrow = el('span', '', '→');
+        var arrow = el('span', '', '↗');
         arrow.setAttribute('aria-hidden', 'true');
         go.appendChild(arrow);
         link.appendChild(go);
@@ -261,7 +267,9 @@
       var last = UGSW.last();
       var item = last && entryByRaw[last.raw];
       if (item) {
-        resumeLink.href = UGSW.playURL(item.raw);
+        resumeLink.href = UGSW.gameURL(item.raw);
+        resumeLink.target = '_blank';
+        resumeLink.rel = 'noopener';
         resumeName.textContent = item.name;
         resumeName.title = item.name;
         resumeWhen.textContent = last.at ? 'Played ' + UGSW.formatDate(last.at) : 'Ready to resume';
@@ -556,7 +564,7 @@
       clearTimeout(filterTimer);
       applyFilter();
       var first = results.querySelector('li.entry:not([hidden]) .title');
-      if (first) location.assign(first.href);
+      if (first) window.open(first.href, '_blank', 'noopener');
     });
   
     function resetAll() {
@@ -580,7 +588,8 @@
     /* ---------- random ---------- */
     function openRandom() {
       var pick = UGS_FILES[Math.floor(Math.random() * UGS_FILES.length)];
-      location.assign(UGSW.playURL(pick));
+      UGSW.remember(pick);
+      window.open(UGSW.gameURL(pick), '_blank', 'noopener');
     }
   
     document.querySelectorAll('[data-random]').forEach(function (button) {

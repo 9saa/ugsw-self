@@ -1,6 +1,7 @@
 /* ============================================================
-   Single-file shell: the player, the tools and the static pages
-   are overlay views stacked on top of the catalogue.
+   Single-file shell: the tools and the static pages are overlay
+   views stacked on top of the catalogue. Games are not routed
+   here — each entry links straight to ../games/<file>.html.
    ============================================================ */
 .ugsw-locked { overflow: hidden; }
 
@@ -74,9 +75,6 @@
   margin: 0 auto;
   padding: var(--pad);
 }
-
-/* The player reuses the site's stage styles but fills the overlay. */
-.ugsw-view .stage { flex: 1; min-height: 0; }
 
 @media (max-width: 640px) {
   .ugsw-view__bar { gap: 6px; min-height: 52px; }
