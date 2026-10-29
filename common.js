@@ -114,7 +114,7 @@ var UGSW = (function () {
       seen[id] = true;
       ids.push(id);
       if (entry.name) names[id] = String(entry.name);
-      paths[id] = entry.path ? String(entry.path) : 'games/' + file;
+      paths[id] = entry.path ? String(entry.path) : 'games/' + gameFolder(id) + '/' + file;
     });
 
     window.UGS_FILES = ids;
@@ -166,6 +166,12 @@ var UGSW = (function () {
     return /^[A-Z0-9]$/.test(c) ? c : '#';
   }
 
+  /* Games live one folder per catalogue group: games/s/clSuperMario.html. */
+  function gameFolder(raw) {
+    var group = groupOf(raw);
+    return group === '#' ? 'other' : group.toLowerCase();
+  }
+
   /* Same code the catalogue prints: letter + position inside that letter. */
   function code(raw) {
     if (typeof UGS_FILES === 'undefined' || !Array.isArray(UGS_FILES)) return '';
@@ -184,7 +190,7 @@ var UGSW = (function () {
     if (path) {
       return path.split('/').map(function (part) { return encodeURIComponent(part); }).join('/');
     }
-    return 'games/' + encodeURIComponent(raw) + '.html';
+    return 'games/' + gameFolder(raw) + '/' + encodeURIComponent(raw) + '.html';
   }
 
   function recent() {
@@ -383,6 +389,7 @@ var UGSW = (function () {
     loadGames: loadGames,
     gamesReady: gamesReady,
     groupOf: groupOf,
+    gameFolder: gameFolder,
     code: code,
     gameURL: gameURL,
     recent: recent,

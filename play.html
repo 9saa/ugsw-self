@@ -8,12 +8,16 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script>
 /* Legacy links pointed at the player page. Games are standalone documents, so
-   send the old ?game= form straight to the file itself. */
+   send the old ?game= form straight to the file itself. Each game lives in the
+   folder for its catalogue group (games/s/, games/1/, games/other/). */
 (function () {
   var raw = '';
   try { raw = new URLSearchParams(location.search).get('game') || ''; } catch (e) {}
   if (!raw) { location.replace('index.html'); return; }
-  location.replace('games/' + encodeURIComponent(raw) + '.html');
+  var rest = /^cl/.test(raw) ? raw.slice(2) : raw;
+  var first = rest.normalize('NFD').charAt(0).toUpperCase();
+  var folder = /^[A-Z0-9]$/.test(first) ? first.toLowerCase() : 'other';
+  location.replace('games/' + folder + '/' + encodeURIComponent(raw) + '.html');
 })();
 </script>
 <style>
