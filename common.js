@@ -81,6 +81,8 @@ var UGSW = (function () {
   // (the single-file build) resolve immediately instead of fetching.
   var manifest = null;
   var manifestPromise = null;
+  // Set by games.json when the games are hosted somewhere else (see README).
+  var gameBase = '';
 
   function hasInlineCatalogue() {
     return typeof UGS_FILES !== 'undefined' && Array.isArray(UGS_FILES) && UGS_FILES.length > 0;
@@ -120,6 +122,10 @@ var UGSW = (function () {
     window.UGS_FILES = ids;
     window.UGS_NAMES = names;
     window.UGS_PATHS = paths;
+    var base = data && typeof data.gameBase === 'string' ? data.gameBase.trim() : '';
+    // Local development serves its own copy of games/, so ignore the hosted base.
+    if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) base = '';
+    gameBase = base ? base.replace(/\/+$/, '') + '/' : '';
     manifest = {
       count: ids.length,
       generated: data && data.generated ? String(data.generated) : '',
@@ -186,11 +192,10 @@ var UGSW = (function () {
   }
 
   function gameURL(raw) {
-    var path = typeof UGS_PATHS !== 'undefined' && UGS_PATHS ? UGS_PATHS[raw] : '';
-    if (path) {
-      return path.split('/').map(function (part) { return encodeURIComponent(part); }).join('/');
-    }
-    return 'games/' + gameFolder(raw) + '/' + encodeURIComponent(raw) + '.html';
+    var path = (typeof UGS_PATHS !== 'undefined' && UGS_PATHS && UGS_PATHS[raw]) || '';
+    if (!path) path = 'games/' + gameFolder(raw) + '/' + raw + '.html';
+    var encoded = path.split('/').map(function (part) { return encodeURIComponent(part); }).join('/');
+    return gameBase + encoded;
   }
 
   function recent() {

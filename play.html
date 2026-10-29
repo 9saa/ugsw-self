@@ -9,15 +9,46 @@
 <script>
 /* Legacy links pointed at the player page. Games are standalone documents, so
    send the old ?game= form straight to the file itself. Each game lives in the
-   folder for its catalogue group (games/s/, games/1/, games/other/). */
+   folder for its catalogue group (games/s/, games/1/, games/other/).
+
+   games.json can name another host in gameBase when this deployment does not
+   carry the games folder, so the manifest decides where the game actually is. */
 (function () {
   var raw = '';
   try { raw = new URLSearchParams(location.search).get('game') || ''; } catch (e) {}
   if (!raw) { location.replace('index.html'); return; }
+
   var rest = /^cl/.test(raw) ? raw.slice(2) : raw;
   var first = rest.normalize('NFD').charAt(0).toUpperCase();
   var folder = /^[A-Z0-9]$/.test(first) ? first.toLowerCase() : 'other';
-  location.replace('games/' + folder + '/' + encodeURIComponent(raw) + '.html');
+  var fallback = 'games/' + folder + '/' + encodeURIComponent(raw) + '.html';
+
+  function go(url) { location.replace(url); }
+  function encode(path) {
+    return String(path).split('/').map(encodeURIComponent).join('/');
+  }
+
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timer = controller ? setTimeout(function () { controller.abort(); }, 1500) : null;
+
+  fetch('games.json', controller ? { signal: controller.signal } : undefined)
+    .then(function (response) { return response.ok ? response.json() : null; })
+    .then(function (data) {
+      if (timer) clearTimeout(timer);
+      var games = (data && data.games) || [];
+      for (var i = 0; i < games.length; i++) {
+        if (games[i] && games[i].id === raw) {
+          var base = data.gameBase ? String(data.gameBase).replace(/\/+$/, '') + '/' : '';
+          go(base + encode(games[i].path));
+          return;
+        }
+      }
+      go(fallback);
+    })
+    .catch(function () {
+      if (timer) clearTimeout(timer);
+      go(fallback);
+    });
 })();
 </script>
 <style>
