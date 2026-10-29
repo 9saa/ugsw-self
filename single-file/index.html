@@ -9953,8 +9953,8 @@ var UGSW = (function () {
         <div class="chat__log" id="chatLog" role="log" aria-live="polite" aria-relevant="additions">
           <div class="chat__empty" id="chatEmpty">
             <span class="kicker">Ready</span>
-            <strong>Ask the stash assistant.</strong>
-            <p>It can help with games, code, or anything else. Pick a starter below or type your own.</p>
+            <strong>Ask the AI assistant.</strong>
+            <p>It can help with homework, projects, or anything else. Pick a starter below or type your own.</p>
             <div class="chat__suggestions" id="chatSuggestions"></div>
           </div>
         </div>
@@ -11210,10 +11210,10 @@ var UGSW = (function () {
 
   var MAX_HISTORY = 12;
   var SUGGESTIONS = [
-    'Recommend a game from the stash for a short break.',
-    'Explain what the UGSW proxy does and does not support.',
-    'Write a short game pitch about a haunted arcade.',
-    'Help me debug a JavaScript function that returns undefined.'
+    'Reccomend what game to play',
+    'Help me with my homework',
+    'I dont know what to do for my school project',
+    'Give me ideas for a classwork assignment'
   ];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -11289,9 +11289,114 @@ var UGSW = (function () {
     });
   }
 
-  function payload() {
-    return history.slice(-MAX_HISTORY).map(function (entry) {
+  function payload(context) {
+    var messages = history.slice(-MAX_HISTORY).map(function (entry) {
       return { role: entry.role, content: entry.content };
+    });
+    var last = messages[messages.length - 1];
+    if (context && last && last.role === 'user') {
+      last.content = last.content + '\n\n' + context;
+    }
+    return messages;
+  }
+
+  /* ---------- catalogue context ----------
+     The model has no idea what this site hosts, so each message carries
+     either the titles that match it or, when someone asks for a
+     recommendation, a handful of real titles to choose from. It is told to
+     name only those; nothing from the catalogue is sent otherwise. */
+  var cataloguePromise = null;
+  var wordIndex = null;
+  var SUGGESTION_CUES = /(recomm|reccom|suggest|random|pick|choose|what should i play|any good)/i;
+
+  function loadCatalogue() {
+    if (cataloguePromise) return cataloguePromise;
+    cataloguePromise = UGSW.loadGames().then(function (manifest) {
+      return (manifest && manifest.games) || [];
+    }).catch(function (error) {
+      console.warn('[ai] catalogue unavailable:', error && error.message);
+      cataloguePromise = null;
+      return [];
+    });
+    return cataloguePromise;
+  }
+
+  function indexCatalogue(games) {
+    if (wordIndex) return wordIndex;
+    wordIndex = games.map(function (game) {
+      var words = Object.create(null);
+      String(game.name || '').toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .split(' ')
+        .forEach(function (word) { if (word) words[word] = true; });
+      return { game: game, words: words };
+    });
+    return wordIndex;
+  }
+
+  function matchGames(games, text) {
+    var tokens = String(text).toLowerCase().match(/[a-z0-9]+/g) || [];
+    var seen = Object.create(null);
+    tokens = tokens.filter(function (token) {
+      if (token.length < 4 || seen[token]) return false;
+      seen[token] = true;
+      return true;
+    });
+    if (!tokens.length) return [];
+
+    var index = indexCatalogue(games);
+    var hits = [];
+    for (var i = 0; i < index.length; i++) {
+      var entry = index[i];
+      var score = 0;
+      for (var j = 0; j < tokens.length; j++) {
+        if (entry.words[tokens[j]]) score++;
+      }
+      if (score) hits.push({ game: entry.game, score: score });
+    }
+    hits.sort(function (a, b) {
+      if (b.score !== a.score) return b.score - a.score;
+      return String(a.game.name).length - String(b.game.name).length;
+    });
+    return hits.slice(0, 12).map(function (hit) { return hit.game; });
+  }
+
+  function label(game) {
+    var code = '';
+    try { code = UGSW.code(game.id); } catch (e) {}
+    return game.name + (code ? ' [' + code + ']' : '');
+  }
+
+  function sampleGames(games, count) {
+    var pool = games.slice();
+    var out = [];
+    while (pool.length && out.length < count) {
+      out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    }
+    return out;
+  }
+
+  function catalogueContext(text) {
+    return loadCatalogue().then(function (games) {
+      if (!games.length) return '';
+      var header = 'Site context: this site\'s catalogue has ' +
+        UGSW.formatInt(games.length) + ' browser games, each with a code like A001.';
+
+      var matches = matchGames(games, text);
+      if (matches.length) {
+        return header + ' Titles that match this message: ' +
+          matches.map(label).join('; ') +
+          '. Use these exact titles and codes when you mention a game, and do not ' +
+          'invent titles that are not listed here.';
+      }
+
+      if (SUGGESTION_CUES.test(text)) {
+        return header + ' The user wants a recommendation and no title matched. ' +
+          'Real titles from the catalogue: ' + sampleGames(games, 16).map(label).join('; ') +
+          '. Pick one or two from this list and say why; do not invent titles.';
+      }
+
+      return '';
     });
   }
 
@@ -11299,10 +11404,12 @@ var UGSW = (function () {
     var pending = addMessage('assistant', 'Thinking…', { pending: true });
     setBusy(true);
 
-    UGSW.apiJSON('/api/ai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: payload() })
+    catalogueContext(userText).then(function (context) {
+      return UGSW.apiJSON('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: payload(context) })
+      });
     }).then(function (data) {
       if (!data || typeof data.reply !== 'string' || !data.reply.trim()) {
         throw new Error('The server returned an empty reply.');
